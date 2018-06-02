@@ -1,0 +1,11 @@
+.table .thead-dark th {
+    background-color: #2C3E50 !important;
+}
+
+.table-light, .table-light>th, .table-light>td {
+    background-color: #fafbfb !important;
+}
+
+.alert-danger .text-muted {
+    color: #ff9e94 !important;
+}

@@ -1,0 +1,32 @@
+{
+  "name": "kmhbmailer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npm run start:client | npm run start:server",
+    "build": "webpack --progress --mode production",
+    "start:client": "webpack-dev-server --inline --hot --progress --mode development",
+    "start:server": "nodemon server.js"
+  },
+  "author": "Jean-Francois Desrochers",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "mithril": "^1.1.6",
+    "nodemailer": "^4.6.5",
+    "request": "^2.87.0",
+    "serve-favicon": "^2.5.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.7.0",
+    "nodemon": "^1.17.5",
+    "webpack": "^4.10.2",
+    "webpack-cli": "^2.1.5",
+    "webpack-dev-server": "^3.1.4"
+  }
+}
