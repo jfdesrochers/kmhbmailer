@@ -101,3 +101,73 @@ module.exports.InputField = {
         ])
     }
 }
+
+module.exports.SelectField = {
+    oninit: function (vnode) {
+        let params = vnode.attrs;
+        let self = this;
+        self.validated = false;
+        self.validate = function () {
+            if (self.validated) return;
+            let isValid = true;
+            if (isValid) {
+                if (typeof params.filter === 'function') {
+                    let filtered = params.filter(params.fieldSet[params.name].value);
+                    if (filtered === false) {
+                        isValid = false;
+                    } else {
+                        params.fieldSet[params.name].value = filtered;
+                    }
+                };
+            };
+            params.fieldSet[params.name].valid = isValid;
+            return isValid;
+        }
+        self.onChange = function (e) {
+            params.fieldSet[params.name].value = e.target.value;
+            self.validate();
+            self.validated = true;
+            if (typeof params.onChange === 'function') {
+                params.onChange(e, params.fieldSet[params.name]);
+            };
+        }
+        self.onExit = function () {
+            self.validate();
+            self.validated = false;
+        }
+        if (!params.fieldSet[params.name]) {
+            params.fieldSet[params.name] = {
+                value: params.defaultValue,
+                valid: null,
+                validate: self.validate
+            }
+        }
+    },
+    view: function (vnode) {
+        let params = vnode.attrs;
+        let self = this;
+
+        let isValid = params.fieldSet[params.name].valid
+
+        return m('.form-group', [
+            m('label', {'for': params.name}, params.label),
+            m('select.form-control'  + (params.small ? '-sm' : '') + (isValid === true ? '.is-valid' : isValid === false ? '.is-invalid' : ''), {
+                oncreate: function (vdom) {
+                    if (params.autofocus) {
+                        vdom.dom.focus();
+                    }
+                },
+                id: params.name,
+                name: params.name,
+                onchange: self.onChange,
+                onblur: self.onExit,
+                disabled: params.disabled || false
+            }, params.options.map((o) => {
+                return m('option', {value: o.value, selected: o.value === params.fieldSet[params.name].value}, o.name)
+            })),
+            (isValid === true && params.successText) ? m('div.valid-feedback', params.successText) :
+            (isValid === false && params.errorText) ? m('div.invalid-feedback', params.errorText) : 
+            (params.helpText) ? m('small.form-text.text-muted', params.helpText) : ''
+        ])
+    }
+}

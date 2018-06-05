@@ -1,7 +1,7 @@
 const m = require('mithril')
 const {zFill} = require('../js/utils/misc')
 
-const {InputField, validateFieldSet, serializeFieldSet} = require('../js/utils/forms')
+const {InputField, validateFieldSet, serializeFieldSet, SelectField} = require('../js/utils/forms')
 
 function firstDayInPreviousMonth() {
     const now = new Date()
@@ -110,6 +110,23 @@ VMSTool.view = function () {
                     autofocus: true,
                     disabled: self.isLoading,
                     onChange: self.saveFields
+                }),
+                m(SelectField, {
+                    name: 'acctprov',
+                    label: 'Account province',
+                    fieldSet: self.fieldSet,
+                    defaultValue: '',
+                    helpText: 'Your VOIP.MS account province',
+                    errorText: 'Please enter a valid email province.',
+                    disabled: self.isLoading,
+                    onChange: self.saveFields,
+                    filter: (s) => {
+                        return (s !== 'ON')
+                    },
+                    options: [
+                        {name: 'Québec', value: 'QC'},
+                        {name: 'Ontario', value: 'ON'}
+                    ]
                 }),
                 m(InputField, {
                     name: 'acctpass',
