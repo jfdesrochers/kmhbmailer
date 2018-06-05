@@ -163,7 +163,7 @@ module.exports.SelectField = {
                 onblur: self.onExit,
                 disabled: params.disabled || false
             }, params.options.map((o) => {
-                return m('option', {value: o.value, selected: o.value === params.fieldSet[params.name].value}, o.name)
+                return m('option', {key: o.value, value: o.value, selected: o.value === params.fieldSet[params.name].value}, o.name)
             })),
             (isValid === true && params.successText) ? m('div.valid-feedback', params.successText) :
             (isValid === false && params.errorText) ? m('div.invalid-feedback', params.errorText) : 

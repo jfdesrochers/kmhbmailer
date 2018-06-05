@@ -1,5 +1,6 @@
-body, html {
+body {
     user-select: none;
+    background-color: #ecf0f1;
 }
 
 .table .thead-dark th {
@@ -12,4 +13,16 @@ body, html {
 
 .alert-danger .text-muted {
     color: #ff9e94 !important;
+}
+
+.jumbotron {
+    background-color: #fff;
+    box-shadow: 2px 2px 2px #adbec2;
+}
+
+.top-logo {
+    padding: 0.5rem;
+    background-color: #fff;
+    border-radius: 0.3rem;
+    box-shadow: 2px 2px 2px #adbec2;
 }
