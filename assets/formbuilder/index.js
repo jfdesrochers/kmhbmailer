@@ -11,7 +11,7 @@ FormBuilder.oninit = function (vnode) {
 
 FormBuilder.view = function () {
     const self = this
-    return m('.container', [
+    return m('.container', m('.row.justify-content-center', m('.col-md-10.col-lg-8', [
         m('.row.align-items-center.mt-2.mb-3.d-print-none', [
             m('.col-auto', m('img.top-logo', {src: '/assets/img/logokmhb.png'})),
             m('.col', [
@@ -37,7 +37,7 @@ FormBuilder.view = function () {
             }),
             m('p', 'For any technical issue, please contact the IT Department.')
         ])
-    ])
+    ])))
 }
 
 const createFormBuilder = function (form) {

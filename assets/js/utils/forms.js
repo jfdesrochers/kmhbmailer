@@ -42,7 +42,7 @@ module.exports.InputField = {
                     let filtered = params.filter(params.fieldSet[params.name].value, params.regEx);
                     if (filtered === false) {
                         isValid = false;
-                    } else {
+                    } else if (filtered !== true) {
                         params.fieldSet[params.name].value = filtered;
                     }
                 } else if (typeof params.filter === 'string') {
@@ -50,12 +50,13 @@ module.exports.InputField = {
                 };
             };
             params.fieldSet[params.name].valid = isValid;
+            self.validated = true;
             return isValid;
         }
         self.onChange = function (e) {
             params.fieldSet[params.name].value = e.target.value;
+            self.validated = false;
             self.validate();
-            self.validated = true;
             if (typeof params.onChange === 'function') {
                 params.onChange(e, params.fieldSet[params.name]);
             };
@@ -78,9 +79,9 @@ module.exports.InputField = {
 
         let isValid = params.fieldSet[params.name].valid
 
-        return m('.form-group', [
+        return m('.form-group.row', m((params.short ? '.col-sm-6' : '.col'), [
             m('label', {'for': params.name}, params.label),
-            m('input.form-control'  + (params.small ? '-sm' : '') + (isValid === true ? '.is-valid' : isValid === false ? '.is-invalid' : ''), {
+            m('input.form-control'  + (params.small ? '.form-control-sm' : '') + (isValid === true ? '.is-valid' : isValid === false ? '.is-invalid' : ''), {
                 oncreate: function (vdom) {
                     if (params.autofocus) {
                         vdom.dom.focus();
@@ -98,7 +99,7 @@ module.exports.InputField = {
             (isValid === true && params.successText) ? m('div.valid-feedback', params.successText) :
             (isValid === false && params.errorText) ? m('div.invalid-feedback', params.errorText) : 
             (params.helpText) ? m('small.form-text.text-muted', params.helpText) : ''
-        ])
+        ]))
     }
 }
 
@@ -115,18 +116,19 @@ module.exports.SelectField = {
                     let filtered = params.filter(params.fieldSet[params.name].value);
                     if (filtered === false) {
                         isValid = false;
-                    } else {
+                    } else if (filtered !== true){
                         params.fieldSet[params.name].value = filtered;
                     }
                 };
             };
             params.fieldSet[params.name].valid = isValid;
+            self.validated = true;
             return isValid;
         }
         self.onChange = function (e) {
             params.fieldSet[params.name].value = e.target.value;
+            self.validated = false;
             self.validate();
-            self.validated = true;
             if (typeof params.onChange === 'function') {
                 params.onChange(e, params.fieldSet[params.name]);
             };
@@ -149,9 +151,9 @@ module.exports.SelectField = {
 
         let isValid = params.fieldSet[params.name].valid
 
-        return m('.form-group', [
+        return m('.form-group.row', m((params.short ? '.col-sm-6' : '.col'), [
             m('label', {'for': params.name}, params.label),
-            m('select.form-control'  + (params.small ? '-sm' : '') + (isValid === true ? '.is-valid' : isValid === false ? '.is-invalid' : ''), {
+            m('select.form-control'  + (params.small ? '.form-control-sm' : '') + (isValid === true ? '.is-valid' : isValid === false ? '.is-invalid' : ''), {
                 oncreate: function (vdom) {
                     if (params.autofocus) {
                         vdom.dom.focus();
@@ -168,6 +170,6 @@ module.exports.SelectField = {
             (isValid === true && params.successText) ? m('div.valid-feedback', params.successText) :
             (isValid === false && params.errorText) ? m('div.invalid-feedback', params.errorText) : 
             (params.helpText) ? m('small.form-text.text-muted', params.helpText) : ''
-        ])
+        ]))
     }
 }
