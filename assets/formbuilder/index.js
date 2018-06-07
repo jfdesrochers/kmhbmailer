@@ -34,9 +34,23 @@ FormBuilder.view = function () {
                         }))
                     })
                 ]
-            }),
-            m('p', 'For any technical issue, please contact the IT Department.')
-        ])
+            })
+        ]),
+        m('.mb-2', [
+            (self.form.mailOptions.showCC) ? m(InputField, {
+                name: 'mailCC',
+                fieldSet: self.fieldSet,
+                label: 'Send a copy of the form to the following email address',
+                defaultValue: '',
+                regEx: /^(([A-Z|a-z|0-9](\.|_){0,1})+[A-Z|a-z|0-9]\@([A-Z|a-z|0-9])+((\.){0,1}[A-Z|a-z|0-9]){2}\.[a-z]{2,3})?$/,
+                helpText: 'Please enter an email address (optional).',
+                errorText: 'Please enter a valid email address.'
+            }) : '',
+            m('button.btn.btn-primary.mr-2', 'Send Email'),
+            m('button.btn.btn-success', 'Print or Preview'),
+            m('button.btn.btn-danger.float-right', 'Reset Form'),
+        ]),
+        m('p', 'For any technical issue, please contact the IT Department.')
     ])))
 }
 

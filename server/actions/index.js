@@ -1,3 +1,4 @@
 module.exports = {
-    vmstool: require('./vmstool')
+    vmstool: require('./vmstool'),
+    kmhbmailer: require('./kmhbmailer')
 }
