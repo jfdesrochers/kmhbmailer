@@ -17,6 +17,13 @@ module.exports.deserializeFieldSet = function(data, fieldSet) {
     });
 }
 
+module.exports.resetFieldSet = function(fieldSet) {
+    Object.keys(fieldSet).forEach(function (o) {
+        fieldSet[o].value = fieldSet[o].default;
+        fieldSet[o].valid = null;
+    });
+}
+
 module.exports.resetValidation = function(fieldSet) {
     Object.keys(fieldSet).forEach(function (o) {
         fieldSet[o].valid = null;
@@ -50,13 +57,13 @@ module.exports.InputField = {
                 };
             };
             params.fieldSet[params.name].valid = isValid;
-            self.validated = true;
             return isValid;
         }
         self.onChange = function (e) {
             params.fieldSet[params.name].value = e.target.value;
             self.validated = false;
             self.validate();
+            self.validated = true;
             if (typeof params.onChange === 'function') {
                 params.onChange(e, params.fieldSet[params.name]);
             };
@@ -69,6 +76,7 @@ module.exports.InputField = {
             params.fieldSet[params.name] = {
                 value: params.defaultValue,
                 valid: null,
+                default: params.defaultValue,
                 validate: self.validate
             }
         }
@@ -122,13 +130,13 @@ module.exports.SelectField = {
                 };
             };
             params.fieldSet[params.name].valid = isValid;
-            self.validated = true;
             return isValid;
         }
         self.onChange = function (e) {
             params.fieldSet[params.name].value = e.target.value;
             self.validated = false;
             self.validate();
+            self.validated = true;
             if (typeof params.onChange === 'function') {
                 params.onChange(e, params.fieldSet[params.name]);
             };
@@ -141,6 +149,7 @@ module.exports.SelectField = {
             params.fieldSet[params.name] = {
                 value: params.defaultValue,
                 valid: null,
+                default: params.defaultValue,
                 validate: self.validate
             }
         }

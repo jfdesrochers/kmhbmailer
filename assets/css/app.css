@@ -3,6 +3,12 @@ body {
     background-color: #ecf0f1;
 }
 
+@media print {
+    body {
+        background-color: #FFF;
+    }
+}
+
 .table .thead-dark th {
     background-color: #2C3E50 !important;
 }
