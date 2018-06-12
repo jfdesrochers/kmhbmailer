@@ -1,11 +1,14 @@
 const m = require('mithril')
-const {InputField, SelectField, serializeFieldSet, deserializeFieldSet, resetValidation, validateFieldSet, resetFieldSet} = require('../js/utils/forms')
+const {InputField, SelectField, serializeFieldSet, deserializeFieldSet, resetValidation, validateFieldSet, resetFieldSet} = require('../utils/forms')
+const LoginForm = require('./login')
 
 const FormBuilder = {}
 
 FormBuilder.oninit = function (vnode) {
     const self = this
-    self.form = vnode.attrs.form
+    self.form = null
+    self.formname = m.route.param('form')
+    self.loginRequired = false
     self.fieldSet = {}
     self.clearError = function () {
         self.error = {message: '', details: ''}
@@ -17,28 +20,50 @@ FormBuilder.oninit = function (vnode) {
         window.scrollTo(0,document.body.scrollHeight)
     }
 
-    self.processTags = function (s, fields) {
-        return s.replace(/\$\[(\w+)\]/g, function (match, param) {
-            return fields[param]
+    self.retrieveForm = function () {
+        self.form = null
+        self.clearError()
+        m.request('api/kmhbmailer.retrieveForm', {
+            method: 'post',
+            data: {
+                formname: self.formname
+            }
+        }).then((res) => {
+            if (res.status === 'success') {
+                self.form = res.data
+            } else {
+                self.error.message = 'A server error occured while retrieving your form. Please try again or contact the IT department if your need further assistance.'
+                self.error.details = res.message
+                console.error(res.message)
+            }
+        }).catch((err) => {
+            const msg = err.message ? String(err.message) : String(err)
+            if (msg.indexOf('E_NotFound') > -1) {
+                m.route.set('/')
+            } else if (msg.indexOf('E_NotAuthenticated') > -1) {
+                self.loginRequired = true
+            } else if (msg.indexOf('E_NotAuthorized') > -1) {
+                self.error.message = 'Sorry, but you are not authorized to use this form. If you believe this is a mistake, please contact your supervisor.'
+                self.error.details = msg
+            } else {
+                self.error.message = 'A server error occured while retrieving your form. Please try again or contact the IT department if your need further assistance.'
+                self.error.details = msg
+            }
+            console.error(err)
         })
     }
+
+    self.retrieveForm()
 
     self.sendEmail = function () {
         self.clearError()
         if (!validateFieldSet(self.fieldSet)) {
             self.error.message = 'Some of your fields contain invalid data. Please make sure you have properly filled the form before you continue.'
-            self.error.details = 'EInvalidData'
+            self.error.details = ''
             return
         }
         const fields = serializeFieldSet(self.fieldSet)
         self.isLoading = true
-        let dest = [self.form.mailOptions.destination]
-        if (typeof self.form.mailOptions.showCC === 'string') {
-            dest.push(fields[self.form.mailOptions.showCC])
-        } else if (self.form.mailOptions.showCC === true && fields['mailCC']) {
-            dest.push(fields['mailCC'])
-        }
-        let subject = self.processTags(self.form.mailOptions.subject, fields)
         let textdata = ''
         Object.keys(fields).forEach((o) => {
             textdata += o + ': ' + fields[o] + '\n'
@@ -46,10 +71,8 @@ FormBuilder.oninit = function (vnode) {
         m.request('api/kmhbmailer.sendMail', {
             method: 'post',
             data: {
-                dest: dest,
-                subject: subject,
+                formname: self.formname,
                 text: textdata,
-                template: self.form.template,
                 fields: fields
             }
         }).then((template) => {
@@ -64,7 +87,7 @@ FormBuilder.oninit = function (vnode) {
             self.isLoading = false
             self.error.message = 'Could not load the required files to do this operation. Please try again and contact the IT department if you need further assistance.'
             self.error.details = String(err)
-            console.log(err)
+            console.error(err)
         })
     }
 
@@ -80,7 +103,7 @@ FormBuilder.oninit = function (vnode) {
         m.request('api/kmhbmailer.renderPreview', {
             method: 'post',
             data: {
-                template: self.form.template,
+                formname: self.formname,
                 fields: fields
             }
         }).then((template) => {
@@ -99,7 +122,7 @@ FormBuilder.oninit = function (vnode) {
             self.isLoading = false
             self.error.message = 'Could not load the required files to do this operation. Please try again and contact the IT department if you need further assistance.'
             self.error.details = String(err)
-            console.log(err)
+            console.error(err)
         })
     }
 
@@ -111,7 +134,7 @@ FormBuilder.oninit = function (vnode) {
 
 FormBuilder.view = function () {
     const self = this
-    return m('.container', m('.row.justify-content-center', m('.col-md-10.col-lg-8', [
+    return self.form ? m('.container', m('.row.justify-content-center', m('.col-md-10.col-lg-8', [
         m('.row.align-items-center.mt-2.mb-3.d-print-none', [
             m('.col-auto', m('img.top-logo', {src: '/assets/img/logokmhb.png'})),
             m('.col', [
@@ -139,7 +162,7 @@ FormBuilder.view = function () {
             })
         ]),
         m('.mb-2', [
-            (self.form.mailOptions.showCC === true) ? m(InputField, {
+            (self.form.showCC === true) ? m(InputField, {
                 name: 'mailCC',
                 fieldSet: self.fieldSet,
                 label: 'Send a copy of the form to the following email address',
@@ -173,11 +196,33 @@ FormBuilder.view = function () {
             }, 'Reset Form'),
         ]),
         m('p.d-print-none', 'For any technical issue, please contact the IT Department.')
+    ]))) : self.loginRequired ? m(LoginForm, {
+        onLoginSuccess: () => {
+            self.loginRequired = false
+            self.retrieveForm()
+        }
+    }) : m('.container', m('.row.justify-content-center', m('.col-md-10.col-lg-8', [
+        m('.row.align-items-center.mt-2.mb-3.d-print-none', [
+            m('.col-auto', m('img.top-logo', {src: '/assets/img/logokmhb.png'})),
+            m('.col', [
+                m('h2.mb-0.mt-1', 'KMHB Mailer'),
+                m('p', 'KMHB Mailer takes care of emailing the required forms to the correct recipients. All you have to do is fill them!')
+            ])
+        ]),
+        m('.jumbotron.d-print-none.py-4.px-3', [
+            m('h3', 'Retrieving your form...'),
+            self.error.message !== '' ? m('.alert.alert-danger.d-print-none', [
+                m('h4.alert-heading', 'Error'),
+                m('p', self.error.message),
+                m('hr.mb-1'),
+                m('small.mb-0.text-muted', self.error.details)
+            ]) : m('.row.justify-content-center.d-print-none.mb-5.mt-5', m('.col-8.text-center.font-weight-bold', [
+                m('p', 'Your form is loading, please wait for a moment...'),
+                m('.progress', m('.progress-bar.progress-bar-striped.progress-bar-animated.bg-info', {style: 'width: 100%;'}))
+            ])),
+            m('p', 'For any technical issue, please contact the IT Department.')
+        ])
     ])))
 }
 
-const createFormBuilder = function (form) {
-    return {view: () => m(FormBuilder, {form: form})}
-}
-
-module.exports = createFormBuilder
+module.exports = FormBuilder

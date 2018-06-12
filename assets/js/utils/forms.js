@@ -1,4 +1,5 @@
 const m = require('mithril')
+const titleCase = require('./titlecase-french.min.js')
 
 module.exports.serializeFieldSet = function(fieldSet) {
     let res = {};
@@ -36,24 +37,46 @@ module.exports.validateFieldSet = function (fieldSet) {
     })
 }
 
+function processFilter(f, s, rEx) {
+    switch (f.func) {
+        case 'titlecase': {
+            return titleCase.convert(s)
+        }
+
+        case 'replace': {
+            return s.replace(rEx, f.pattern)
+        }
+
+        case 'eval': {
+            switch (f.op) {
+                case 'eq':  return (s === f.val)
+                case 'neq': return (s !== f.val)
+                case 'gt': return (s > f.val)
+                case 'lt': return (s < f.val)
+                case 'gte': return (s >= f.val)
+                case 'lte': return (s <= f.val)
+            }
+        }
+    }
+}
+
 module.exports.InputField = {
     oninit: function (vnode) {
         let params = vnode.attrs;
+        params.regEx = new RegExp(params.regEx)
         let self = this;
         self.validated = false;
         self.validate = function () {
             if (self.validated) return;
             let isValid = params.regEx.test(params.fieldSet[params.name].value);
             if (isValid) {
-                if (typeof params.filter === 'function') {
-                    let filtered = params.filter(params.fieldSet[params.name].value, params.regEx);
+                if (params.filter) {
+                    let filtered = processFilter(params.filter, params.fieldSet[params.name].value, params.regEx);
                     if (filtered === false) {
                         isValid = false;
                     } else if (filtered !== true) {
                         params.fieldSet[params.name].value = filtered;
                     }
-                } else if (typeof params.filter === 'string') {
-                    params.fieldSet[params.name].value = params.fieldSet[params.name].value.replace(params.regEx, params.filter);
                 };
             };
             params.fieldSet[params.name].valid = isValid;
@@ -87,7 +110,7 @@ module.exports.InputField = {
 
         let isValid = params.fieldSet[params.name].valid
 
-        return m('.form-group.row', m((params.short ? '.col-sm-6' : '.col'), [
+        return m('.form-group.row' + (params.center ? '.justify-content-center' : ''), m((params.short ? '.col-sm-6' : '.col'), [
             m('label', {'for': params.name}, params.label),
             m('input.form-control'  + (params.small ? '.form-control-sm' : '') + (isValid === true ? '.is-valid' : isValid === false ? '.is-invalid' : ''), {
                 oncreate: function (vdom) {
@@ -102,7 +125,8 @@ module.exports.InputField = {
                 value: params.fieldSet[params.name].value,
                 onchange: self.onChange,
                 onblur: self.onExit,
-                disabled: params.disabled || false
+                disabled: params.disabled || false,
+                autocomplete: params.autocomplete ? 'on' : 'off'
             }),
             (isValid === true && params.successText) ? m('div.valid-feedback', params.successText) :
             (isValid === false && params.errorText) ? m('div.invalid-feedback', params.errorText) : 
@@ -114,17 +138,18 @@ module.exports.InputField = {
 module.exports.SelectField = {
     oninit: function (vnode) {
         let params = vnode.attrs;
+        params.regEx = new RegExp(params.regEx)
         let self = this;
         self.validated = false;
         self.validate = function () {
             if (self.validated) return;
             let isValid = true;
             if (isValid) {
-                if (typeof params.filter === 'function') {
-                    let filtered = params.filter(params.fieldSet[params.name].value);
+                if (params.filter) {
+                    let filtered = processFilter(params.filter, params.fieldSet[params.name].value, params.regEx);
                     if (filtered === false) {
                         isValid = false;
-                    } else if (filtered !== true){
+                    } else if (filtered !== true) {
                         params.fieldSet[params.name].value = filtered;
                     }
                 };
@@ -160,7 +185,7 @@ module.exports.SelectField = {
 
         let isValid = params.fieldSet[params.name].valid
 
-        return m('.form-group.row', m((params.short ? '.col-sm-6' : '.col'), [
+        return m('.form-group.row' + (params.center ? '.justify-content-center' : ''), m((params.short ? '.col-sm-6' : '.col'), [
             m('label', {'for': params.name}, params.label),
             m('select.form-control'  + (params.small ? '.form-control-sm' : '') + (isValid === true ? '.is-valid' : isValid === false ? '.is-invalid' : ''), {
                 oncreate: function (vdom) {

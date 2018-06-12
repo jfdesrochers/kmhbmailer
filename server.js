@@ -34,9 +34,9 @@ passport.use(new ActiveDirectoryStrategy({
         password: env.LDAP_PASS
     }
 }, function (profile, ad, done) {
-    ad.isUserMemberOf(profile._json.dn, 's KMHBMailer Authorized', function (err, isMember) {
+    ad.isUserMemberOf(profile._json.dn, 's KMHBMailer Privileged', function (err, isMember) {
         if (err) return done(err)
-        console.log(isMember)
+        profile.isPrivileged = isMember
         return done(null, profile)
     })
 }))
@@ -49,26 +49,30 @@ passport.deserializeUser(function (user, done) {
     done(null, user)
 });
 
-app.post('/login', passport.authenticate('ActiveDirectory', {failWithError: true}), function (req, res) {
-    res.json(req.user)
-}, function (err) {
-    res.status(401).json({status: 'error', message: 'Not Authenticated'})
-})
-
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'))
+})
+
+app.post('/login', passport.authenticate('ActiveDirectory', {failWithError: true}), function (req, res) {
+    res.json({status: 'success', data: req.user})
+}, function (err) {
+    res.status(401).json({status: 'error', message: 'E_NotAuthenticated - Not Authenticated'})
 })
 
 app.post('/api/:endpoint', (req, res) => {
     res.contentType = 'application/json'
     let endpoint = (req.params.endpoint || '').split('.')
+    let authUser = null
+    if (req.isAuthenticated) {
+        authUser = req.user
+    }
     if (endpoint.length !== 2) {
-        return res.status(400).json({'status': 'error', 'message': 'The request is not properly formed.'})
+        return res.status(400).json({'status': 'error', 'message': 'E_MalformedRequest - The request is not properly formed.'})
     }
     if (!(endpoint[0] in actions) || !(endpoint[1] in actions[endpoint[0]])) {
-        return res.status(400).json({'status': 'error', 'message': 'Wrong endpoint.'})
+        return res.status(400).json({'status': 'error', 'message': 'E_EndpointNotFound - Wrong endpoint.'})
     }
-    actions[endpoint[0]][endpoint[1]](req.body).then((data) => {
+    actions[endpoint[0]][endpoint[1]](req.body, authUser).then((data) => {
         res.json({'status': 'success', 'data': data})
     }).catch((err) => {
         res.status(500).json({status: 'error', 'message': err})

@@ -1,11 +1,5 @@
 const m = require('mithril')
-const forms = require('../forms')
-const createFormBuilder = require('../formbuilder')
-
-const formRoutes = {}
-forms.forEach((o) => {
-    formRoutes[o.route] = createFormBuilder(o.form)
-})
+const FormBuilder = require('./ui/formbuilder')
 
 m.route.prefix("")
 
@@ -30,6 +24,7 @@ MainPage.view = function () {
     ])
 }
 
-formRoutes['/'] = MainPage
-
-m.route(document.getElementById('contents'), '/', formRoutes)
+m.route(document.getElementById('contents'), '/', {
+    '/': MainPage,
+    '/:form': FormBuilder
+})
