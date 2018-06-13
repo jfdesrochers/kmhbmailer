@@ -53,10 +53,27 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'))
 })
 
-app.post('/login', passport.authenticate('ActiveDirectory', {failWithError: true}), function (req, res) {
-    res.json({status: 'success', data: req.user})
-}, function (err) {
-    res.status(401).json({status: 'error', message: 'E_NotAuthenticated - Not Authenticated'})
+app.post('/login', (req, res) => {
+    passport.authenticate('ActiveDirectory', (err, user, info) => {
+        if (err) {
+            if (err.name === 'InvalidCredentialsError') {
+                return res.status(401).json({status: 'error', message: 'E_NotAuthenticated - Not Authenticated'})
+            } else {
+                console.error(err)
+                return res.status(500).json({status: 'error', message: err.message})
+            }
+        }
+        if (!user) {
+            return res.status(401).json({status: 'error', message: 'E_NotAuthenticated - Not Authenticated'})
+        }
+        req.logIn(user, (err) => {
+            if (err) {
+                console.error(err)
+                return res.status(500).json({status: 'error', message: err.message})
+            }
+            return res.json({status: 'success', data: user})
+        })
+    })(req, res)
 })
 
 app.post('/api/:endpoint', (req, res) => {
@@ -79,7 +96,7 @@ app.post('/api/:endpoint', (req, res) => {
     })
 })
 
-const port = process.env.PORT || 8081
+const port = process.env.PORT || 8082
 
 app.listen(port, function () {
     console.log(`Server started at port ${port}...`)

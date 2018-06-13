@@ -27,11 +27,19 @@ LoginForm.oninit = function (vnode) {
             method: 'post',
             data: fields
         }).then((user) => {
+            self.isLoading = false
             self.onLoginSuccess(user)
         }).catch((err) => {
-            self.error.message = 'The authentication was unsuccessful. Please try again.'
-            self.error.details = err.message ? String(err.message) : String(err)
-            console.error(err)
+            self.isLoading = false
+            let msg = err.message ? String(err.message) : String(err)
+            if (msg.indexOf('E_NotAuthenticated') > -1) {
+                self.error.message = 'The authentication was unsuccessful. Please check your credentials and try again.'
+                self.error.details = msg
+            } else {
+                self.error.message = 'A server error occured. Please try again.'
+                self.error.details = msg
+                console.error(err)
+            }
         })
     }
 }
