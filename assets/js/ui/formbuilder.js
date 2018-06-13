@@ -15,6 +15,7 @@ FormBuilder.oninit = function (vnode) {
     }
     self.clearError()
     self.isLoading = false
+    self.sendSuccess = false
 
     self.scrollPage = function () {
         window.scrollTo(0,document.body.scrollHeight)
@@ -82,6 +83,7 @@ FormBuilder.oninit = function (vnode) {
                 self.error.details = template.message
             } else {
                 resetFieldSet(self.fieldSet)
+                self.sendSuccess = true
             }
         }).catch((err) => {
             self.isLoading = false
@@ -181,6 +183,16 @@ FormBuilder.view = function () {
                 m('p', self.error.message),
                 m('hr.mb-1'),
                 m('small.mb-0.text-muted', self.error.details)
+            ]) : '',
+            self.sendSuccess ? m('.alert.alert-success.d-print-none', {oncreate: () => {
+                setTimeout(() => {
+                    self.sendSuccess = false
+                    m.redraw()
+                }, 5000)
+                self.scrollPage()
+            }}, [
+                m('h4.alert-heading', 'Success'),
+                m('p', 'The form has been successfully sent to the proper recipients! Thank you!')
             ]) : '',
             m('button.btn.btn-primary.d-print-none.mr-2', {
                 disabled: self.isLoading,

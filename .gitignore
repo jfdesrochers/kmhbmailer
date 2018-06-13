@@ -66,5 +66,9 @@ Icon.icns
 # forms
 forms
 
+# Deployment
+deploy.bat
+.rsyncignore
+
 # MacOS cr*p
 .DS_Store 
