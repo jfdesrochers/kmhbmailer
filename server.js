@@ -71,7 +71,15 @@ app.post('/login', (req, res) => {
                 console.error(err)
                 return res.status(500).json({status: 'error', message: err.message})
             }
-            return res.json({status: 'success', data: user})
+            let authUser = {
+                'displayName': user.displayName,
+                'firstName': user.name.givenName,
+                'lastName': user.name.familyName,
+                'email': user._json.mail,
+                'jobTitle': user._json.title,
+                'accountName': user._json.sAMAccountName
+            }
+            return res.json({status: 'success', data: authUser})
         })
     })(req, res)
 })

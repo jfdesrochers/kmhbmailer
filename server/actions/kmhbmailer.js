@@ -23,7 +23,12 @@ kmhbmailer.sendMail = function (data, authUser) {
                 return reject('E_NotAuthorized - User not authorized')
             }
         }
-        data.fields.authUser = authUser.displayName
+        if (authUser) {
+            data.fields.authDisplayName = authUser.displayName
+            data.fields.authFirstName = authUser.name.givenName
+            data.fields.authLastName = authUser.name.familyName
+            data.fields.authEmail = authUser._json.mail
+        }
         let dest = [form.mailOptions.destination]
         if (typeof form.mailOptions.showCC === 'string') {
             dest.push(data.fields[form.mailOptions.showCC])
@@ -54,7 +59,12 @@ kmhbmailer.renderPreview = function (data, authUser) {
                 return reject('E_NotAuthorized - User not authorized')
             }
         }
-        data.fields.authUser = authUser.displayName
+        if (authUser) {
+            data.fields.authDisplayName = authUser.displayName
+            data.fields.authFirstName = authUser.name.givenName
+            data.fields.authLastName = authUser.name.familyName
+            data.fields.authEmail = authUser._json.mail
+        }
         fs.readFile(path.join(__dirname, '..', 'forms', form.mailOptions.template), (err, template) => {
             if (err) {return reject(err.message)}
             const rendered = Mustache.render(template.toString('utf8'), data.fields)

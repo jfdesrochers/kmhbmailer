@@ -4,12 +4,15 @@ const LoginForm = require('./login')
 
 const FormBuilder = {}
 
+const processTags = function (s, fields) {
+    return s.replace(/\$\[(\w+)\]/g, function (match, param) {
+        return fields[param]
+    })
+}
+
 FormBuilder.oninit = function (vnode) {
     const self = this
-    self.form = null
     self.formname = m.route.param('form')
-    self.loginRequired = false
-    self.fieldSet = {}
     self.clearError = function () {
         self.error = {message: '', details: ''}
     }
@@ -21,9 +24,12 @@ FormBuilder.oninit = function (vnode) {
         window.scrollTo(0,document.body.scrollHeight)
     }
 
-    self.retrieveForm = function () {
+    self.retrieveForm = function (user) {
         self.form = null
         self.clearError()
+        self.loginUser = user || {}
+        self.fieldSet = {}
+        self.loginRequired = false
         m.request('api/kmhbmailer.retrieveForm', {
             method: 'post',
             data: {
@@ -209,9 +215,9 @@ FormBuilder.view = function () {
         ]),
         m('p.d-print-none', 'For any technical issue, please contact the IT Department.')
     ]))) : self.loginRequired ? m(LoginForm, {
-        onLoginSuccess: () => {
+        onLoginSuccess: (user) => {
             self.loginRequired = false
-            self.retrieveForm()
+            self.retrieveForm(user)
         }
     }) : m('.container', m('.row.justify-content-center', m('.col-md-10.col-lg-8', [
         m('.row.align-items-center.mt-2.mb-3.d-print-none', [
