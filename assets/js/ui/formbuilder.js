@@ -4,9 +4,24 @@ const LoginForm = require('./login')
 
 const FormBuilder = {}
 
-const processTags = function (s, fields) {
-    return s.replace(/\$\[(\w+)\]/g, function (match, param) {
-        return fields[param]
+// Conditions of format: {'fieldname': {'op': 'val'}}
+// op can be: eq, neq, gt, lt, gte, lte
+const processConditions = function (conditions, fieldset) {
+    if (!conditions) return true
+    return conditions.every((c) => {
+        let fieldname = Object.keys(c)[0]
+        if (!fieldset[fieldname]) return false
+        let op = Object.keys(c[fieldname])[0]
+        let val = c[fieldname][op]
+        let s = fieldset[fieldname].value
+        switch (op) {
+            case 'eq':  return (s === val)
+            case 'neq': return (s !== val)
+            case 'gt': return (s > val)
+            case 'lt': return (s < val)
+            case 'gte': return (s >= val)
+            case 'lte': return (s <= val)
+        }
     })
 }
 
@@ -152,10 +167,12 @@ FormBuilder.view = function () {
         ]),
         m('.jumbotron.d-print-none.py-4.px-3', [
             self.form.sections.map((sect) => {
-                return [
-                    m('h3', sect.title),
-                    m('p.lead', sect.subtitle),
-                    sect.fields.map((fld) => {
+                return processConditions(sect.conditions, self.fieldSet) ? [
+                    sect.title ? m('h3', sect.title) : '',
+                    sect.subtitle ? m('p.lead', sect.subtitle) : '',
+                    sect.fields.filter((fld) => {
+                        return processConditions(fld.conditions, self.fieldSet)
+                    }).map((fld) => {
                         return ('options' in fld) ? m(SelectField, Object.assign(fld, {
                             key: fld.name,
                             fieldSet: self.fieldSet,
@@ -166,7 +183,7 @@ FormBuilder.view = function () {
                             disabled: self.isLoading
                         }))
                     })
-                ]
+                ] : ''
             })
         ]),
         m('.mb-2', [

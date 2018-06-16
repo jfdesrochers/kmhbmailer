@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "npm run start:client | npm run start:server",
     "build": "webpack --progress --mode production",
+    "makeform": "node tools/makeform.js",
     "start:client": "webpack-dev-server --inline --hot --progress --mode development",
     "start:server": "nodemon server.js"
   },

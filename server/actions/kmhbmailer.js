@@ -29,7 +29,10 @@ kmhbmailer.sendMail = function (data, authUser) {
             data.fields.authLastName = authUser.name.familyName
             data.fields.authEmail = authUser._json.mail
         }
-        let dest = [form.mailOptions.destination]
+        let dest = form.mailOptions.destination
+        if (!(dest instanceof Array)) {
+            dest = [dest]
+        }
         if (typeof form.mailOptions.showCC === 'string') {
             dest.push(data.fields[form.mailOptions.showCC])
         } else if (form.mailOptions.showCC === true && data.fields['mailCC']) {

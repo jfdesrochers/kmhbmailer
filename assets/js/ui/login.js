@@ -28,7 +28,7 @@ LoginForm.oninit = function (vnode) {
             data: fields
         }).then((user) => {
             self.isLoading = false
-            self.onLoginSuccess(user)
+            self.onLoginSuccess(user.data)
         }).catch((err) => {
             self.isLoading = false
             let msg = err.message ? String(err.message) : String(err)

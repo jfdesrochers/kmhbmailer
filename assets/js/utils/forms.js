@@ -126,7 +126,10 @@ module.exports.InputField = {
                 onchange: self.onChange,
                 onblur: self.onExit,
                 disabled: params.disabled || false,
-                autocomplete: params.autocomplete ? 'on' : 'off'
+                autocomplete: params.autocomplete ? 'on' : 'off',
+                autocapitalize: params.autocapitalize ? 'on' : 'off',
+                autocorrect: params.autocorrect ? 'on' : 'off',
+                spellcheck: params.autocorrect
             }),
             (isValid === true && params.successText) ? m('div.valid-feedback', params.successText) :
             (isValid === false && params.errorText) ? m('div.invalid-feedback', params.errorText) : 
