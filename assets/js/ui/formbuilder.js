@@ -103,6 +103,9 @@ FormBuilder.oninit = function (vnode) {
                 self.error.message = 'Could not load the required files to do this operation. Please try again and contact the IT department if you need further assistance.'
                 self.error.details = template.message
             } else {
+                if (self.form.action === 'sendandprint') {
+                    self.generatePreview()
+                }
                 resetFieldSet(self.fieldSet)
                 self.sendSuccess = true
             }
@@ -217,14 +220,14 @@ FormBuilder.view = function () {
                 m('h4.alert-heading', 'Success'),
                 m('p', 'The form has been successfully sent to the proper recipients! Thank you!')
             ]) : '',
-            m('button.btn.btn-primary.d-print-none.mr-2', {
+            (self.form.action !== 'printonly') ? m('button.btn.btn-primary.d-print-none.mr-2', {
                 disabled: self.isLoading,
                 onclick: self.sendEmail
-            }, 'Send Email'),
-            m('button.btn.btn-success.d-print-none', {
+            }, (self.form.action === 'sendandprint') ? 'Send and Print' : 'Send Email') : '',
+            (self.form.action === 'printonly' || self.form.action === 'all') ? m('button.btn.btn-success.d-print-none', {
                 disabled: self.isLoading,
                 onclick: self.generatePreview
-            }, 'Print Form'),
+            }, 'Print Form') : '',
             m('button.btn.btn-danger.d-print-none.float-right', {
                 disabled: self.isLoading,
                 onclick: self.resetForm

@@ -104,6 +104,10 @@ module.exports.InputField = {
             }
         }
     },
+    onremove: function (vnode) {
+        let params = vnode.attrs;
+        delete params.fieldSet[params.name]
+    },
     view: function (vnode) {
         let params = vnode.attrs;
         let self = this;
@@ -181,6 +185,10 @@ module.exports.SelectField = {
                 validate: self.validate
             }
         }
+    },
+    onremove: function (vnode) {
+        let params = vnode.attrs;
+        delete params.fieldSet[params.name]
     },
     view: function (vnode) {
         let params = vnode.attrs;
