@@ -20,6 +20,7 @@ kmhbmailer.sendMail = function (data, authUser) {
             if (!authUser) {
                 return reject('E_NotAuthenticated - User not authenticated')
             } else if (form.authentication.authorizedOnly && !authUser.isPrivileged) {
+                if (form.authentication.authorizedOnly && !form.authentication.authorizedUsers[authUser._json.sAMAccountName.toLowerCase()])
                 return reject('E_NotAuthorized - User not authorized')
             }
         }
@@ -59,6 +60,7 @@ kmhbmailer.renderPreview = function (data, authUser) {
             if (!authUser) {
                 return reject('E_NotAuthenticated - User not authenticated')
             } else if (form.authentication.authorizedOnly && !authUser.isPrivileged) {
+                if (form.authentication.authorizedOnly && !form.authentication.authorizedUsers[authUser._json.sAMAccountName.toLowerCase()])
                 return reject('E_NotAuthorized - User not authorized')
             }
         }

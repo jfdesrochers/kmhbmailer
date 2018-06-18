@@ -168,6 +168,10 @@ FormBuilder.view = function () {
                 m('p', self.form.subtitle)
             ])
         ]),
+        m('button.btn.btn-danger.d-print-none.float-right.mr-2.mt-2', {
+            disabled: self.isLoading,
+            onclick: self.resetForm
+        }, 'Reset Form'),
         m('.jumbotron.d-print-none.py-4.px-3', [
             self.form.sections.map((sect) => {
                 return processConditions(sect.conditions, self.fieldSet) ? [
@@ -228,10 +232,6 @@ FormBuilder.view = function () {
                 disabled: self.isLoading,
                 onclick: self.generatePreview
             }, 'Print Form') : '',
-            m('button.btn.btn-danger.d-print-none.float-right', {
-                disabled: self.isLoading,
-                onclick: self.resetForm
-            }, 'Reset Form'),
         ]),
         m('p.d-print-none', 'For any technical issue, please contact the IT Department.')
     ]))) : self.loginRequired ? m(LoginForm, {
